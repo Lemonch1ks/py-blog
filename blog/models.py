@@ -7,7 +7,7 @@ from blog_system.settings import AUTH_USER_MODEL
 class Post(models.Model):
     title = models.CharField(max_length=200)
     content = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_time = models.DateTimeField(auto_now_add=True)
     owner = models.ForeignKey(
         AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -30,5 +30,5 @@ class Commentary(models.Model):
         on_delete=models.CASCADE,
         related_name="commentary"
     )
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_time = models.DateTimeField(auto_now_add=True)
     content = models.TextField()

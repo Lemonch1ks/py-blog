@@ -13,12 +13,12 @@ class PostAdmin(admin.ModelAdmin):
     list_display = (
         "title",
         "owner",
-        "created_at",
+        "created_time",
         "content",
     )
     list_filter = (
         "owner",
-        "created_at",
+        "created_time",
     )
     search_fields = (
         "title",
@@ -32,12 +32,12 @@ class CommentaryAdmin(admin.ModelAdmin):
     list_display = (
         "user",
         "post",
-        "created_at",
+        "created_time",
         "content",
     )
     list_filter = (
         "user",
-        "created_at",
+        "created_time",
     )
     search_fields = (
         "content",
