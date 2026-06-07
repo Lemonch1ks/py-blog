@@ -1,3 +1,5 @@
+{% load crispy_forms_filters %}
+
 <!doctype html>
 <html lang="en">
   <head>
@@ -16,6 +18,10 @@
   </head>
   <body>
     {% block content %}
+    {% endblock %}
+
+    {% block pagination %}
+      {% include 'pagination/paginator.html' %}
     {% endblock %}
   </body>
 </html>
