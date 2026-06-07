@@ -1,9 +1,9 @@
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import redirect, render
-from django.views.generic import ListView, DetailView
+from django.shortcuts import redirect
+from django.views.generic import DetailView, ListView
 
 from blog.forms import CommentaryForm
-from blog.models import Post, Commentary
+from blog.models import Commentary, Post
 
 
 class IndexView(ListView):
@@ -13,12 +13,28 @@ class IndexView(ListView):
     paginate_by = 5
 
 
-def post_detail(request: HttpRequest, pk: int) -> HttpResponse:
-    post = Post.objects.get(pk=pk)
-    comments = Commentary.objects.filter(
-        post=post).select_related("user").order_by("-created_time")
+class PostDetailView(DetailView):
+    model = Post
+    template_name = "blog/post_detail.html"
+    context_object_name = "post"
 
-    if request.method == "POST":
+    def get_context_data(self, **kwargs) -> dict:
+        context = super().get_context_data(**kwargs)
+        context["comments"] = (
+            Commentary.objects.filter(post=self.object)
+            .select_related("user")
+            .order_by("-created_time")
+        )
+        context.setdefault("form", CommentaryForm())
+        return context
+
+    def post(
+        self,
+        request: HttpRequest,
+        *args,
+        **kwargs,
+    ) -> HttpResponse:
+        self.object = self.get_object()
         form = CommentaryForm(request.POST)
 
         if not request.user.is_authenticated:
@@ -29,21 +45,15 @@ def post_detail(request: HttpRequest, pk: int) -> HttpResponse:
             )
         elif form.is_valid():
             comment = form.save(commit=False)
-            comment.post = post
+            comment.post = self.object
             comment.user = request.user
             comment.save()
 
             return redirect(
                 "blog:post-detail",
-                pk=post.pk,
+                pk=self.object.pk,
             )
-    else:
-        form = CommentaryForm()
 
-    context = {
-        "post": post,
-        "comments": comments,
-        "form": form,
-    }
-
-    return render(request, "blog/post_detail.html", context=context)
+        return self.render_to_response(
+            self.get_context_data(form=form)
+        )
